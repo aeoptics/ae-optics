@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>ae optics — مساعد العدسات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --brand:#414141;--cream:#EFE9C8;--cream2:#F7F4E8;--cream3:#D8D0A0;
+  --bg:#F5F4F0;--card:#FFF;--bdr:#E4E1D6;
+  --t1:#1A1A1A;--t2:#5A5A5A;--t3:#9A9A9A;
+  --green:#1D9E75;--glt:#E1F5EE;
+  --amber:#8A5200;--alt:#FFF0D0;
+  --wa:#25D366;--r14:14px;--r10:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Cairo',sans-serif;background:var(--brand);}
+
+/* ── CRITICAL FIX: force LTR for slide container ── */
+#po{width:100%;height:100vh;overflow:hidden;position:relative;}
+#pi{
+  display:flex;height:100%;
+  direction:ltr; /* MUST be LTR — RTL reverses flex and breaks sliding */
+  transition:transform .42s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+
+/* ── panels ── */
+.pnl{
+  min-width:100vw;width:100vw;height:100vh;
+  overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;
+  background:var(--bg);
+  direction:rtl; /* restore RTL for content */
+  -webkit-overflow-scrolling:touch;
+}
+.pnl-dk{background:var(--brand);}
+
+/* ── header ── */
+.hdr{
+  background:var(--brand);padding:13px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;flex-shrink:0;
+  direction:rtl;
+}
+.hdr-back{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .14s;
+}
+.hdr-back:active{background:rgba(255,255,255,.18);}
+.hdr-step{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.04em;}
+
+/* ── welcome ── */
+.w-in{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:36px 28px;text-align:center;
+}
+.w-tag{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--cream3);text-transform:uppercase;margin-bottom:16px;}
+.w-ttl{font-size:25px;font-weight:900;color:var(--cream);line-height:1.38;margin-bottom:11px;}
+.w-sub{font-size:13px;color:rgba(239,233,200,.5);line-height:1.75;margin-bottom:34px;max-width:290px;}
+.w-feats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:36px;}
+.w-feat{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(239,233,200,.1);border:1px solid rgba(239,233,200,.13);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;color:rgba(239,233,200,.68);font-weight:600;
+}
+.btn-start{
+  width:100%;max-width:270px;padding:17px;
+  border-radius:var(--r14);border:none;
+  background:var(--cream);color:var(--brand);
+  font-family:'Cairo',sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:transform .13s,background .13s;
+}
+.btn-start:active{transform:scale(.97);background:var(--cream2);}
+
+/* ── question body ── */
+.q-bd{flex:1;display:flex;flex-direction:column;padding:18px 17px 30px;}
+.q-prog{margin-bottom:18px;}
+.q-pr-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.q-pr-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.05em;}
+.q-pr-pct{font-size:11px;font-weight:800;color:var(--green);}
+.q-pr-bar{height:3px;background:var(--bdr);border-radius:3px;overflow:hidden;}
+.q-pr-fill{height:100%;background:var(--green);border-radius:3px;transition:width .5s ease;}
+.q-chip{display:inline-block;font-size:10px;font-weight:800;background:var(--cream2);color:var(--brand);padding:4px 11px;border-radius:20px;letter-spacing:.06em;margin-bottom:10px;}
+.q-txt{font-size:17px;font-weight:800;color:var(--t1);line-height:1.45;margin-bottom:5px;}
+.q-sub{font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:18px;}
+.med-box{background:var(--alt);border:1px solid #F5C878;border-radius:var(--r10);padding:11px 13px;margin-top:14px;display:flex;gap:9px;align-items:flex-start;}
+.med-txt{font-size:12px;color:var(--amber);line-height:1.65;font-weight:600;}
+
+/* ── options ── */
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{
+  display:flex;align-items:center;gap:11px;
+  padding:13px 14px;border:1.5px solid var(--bdr);
+  background:var(--card);border-radius:var(--r14);
+  cursor:pointer;text-align:right;
+  transition:border-color .13s,background .13s,transform .1s;
+  position:relative;
+}
+.opt:active{transform:scale(.984);}
+.opt.sel{border-color:var(--green);background:var(--glt);}
+.opt.dis{opacity:.38;pointer-events:none;}
+.oi{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ob{flex:1;}
+.ot{font-size:13.5px;font-weight:700;color:var(--t1);display:block;line-height:1.3;}
+.oh{font-size:11px;color:var(--t3);display:block;margin-top:3px;line-height:1.45;}
+.ock{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .13s;}
+.opt.sel .ock{background:var(--green);border-color:var(--green);}
+.ockd{width:7px;height:7px;border-radius:50%;background:#fff;opacity:0;transform:scale(0);transition:all .11s;}
+.opt.sel .ockd{opacity:1;transform:scale(1);}
+.soon{position:absolute;top:-1px;left:-1px;background:var(--alt);color:var(--amber);font-size:9px;font-weight:800;padding:3px 8px;border-radius:var(--r14) 0 var(--r10) 0;}
+
+/* ── brand grid ── */
+.brd-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.brd-opt{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:14px 10px;border:1.5px solid var(--bdr);
+  background:var(--card);border-radius:var(--r14);
+  cursor:pointer;text-align:center;
+  transition:border-color .13s,background .13s,transform .1s;gap:7px;
+}
+.brd-opt:active{transform:scale(.97);}
+.brd-opt.sel{border-color:var(--green);background:var(--glt);}
+.brd-ico{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;letter-spacing:-.5px;
+}
+.brd-nm{font-size:12px;font-weight:700;color:var(--t1);line-height:1.2;}
+.brd-sb{font-size:10px;color:var(--t3);margin-top:-2px;}
+.brd-opt.sel .brd-ico{filter:brightness(1.05);}
+
+/* ── result ── */
+.res-hero{background:var(--brand);padding:22px 20px 26px;flex-shrink:0;}
+.res-top{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--cream3);text-transform:uppercase;margin-bottom:10px;}
+.res-brpill{display:inline-flex;align-items:center;gap:5px;background:rgba(239,233,200,.12);border:1px solid rgba(239,233,200,.2);border-radius:20px;padding:4px 12px;font-size:11px;color:rgba(239,233,200,.68);font-weight:700;margin-bottom:10px;}
+.res-nm{font-size:19px;font-weight:900;color:var(--cream);line-height:1.35;margin-bottom:4px;}
+.res-sb{font-size:12px;color:rgba(239,233,200,.46);margin-bottom:14px;}
+.res-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.rtag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(239,233,200,.13);color:var(--cream);border:1px solid rgba(239,233,200,.18);}
+.res-body{padding:16px 17px 0;display:flex;flex-direction:column;gap:13px;}
+.inf-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r14);padding:15px 17px;}
+.inf-lbl{font-size:10px;font-weight:800;color:var(--t3);letter-spacing:.06em;margin-bottom:7px;}
+.inf-txt{font-size:13px;color:var(--t2);line-height:1.82;}
+.alt-row{background:var(--card);border:1px dashed var(--bdr);border-radius:var(--r10);padding:12px 15px;display:flex;align-items:center;gap:10px;}
+.alt-ico{width:30px;height:30px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.alt-l{font-size:10px;color:var(--t3);margin-bottom:2px;}
+.alt-n{font-size:12.5px;font-weight:700;color:var(--t1);}
+.sum-card{background:var(--cream2);border:1px solid var(--bdr);border-radius:var(--r14);padding:14px 17px;}
+.sum-l{font-size:10px;font-weight:800;color:var(--brand);letter-spacing:.06em;margin-bottom:9px;}
+.sum-items{display:flex;flex-direction:column;gap:5px;}
+.sum-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--t2);line-height:1.5;}
+.sum-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px;}
+.amb-note{background:var(--alt);border:1px solid #F5C878;border-radius:var(--r10);padding:12px 15px;display:flex;gap:9px;}
+.btn-wa{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  width:100%;padding:16px;border-radius:var(--r14);border:none;
+  background:var(--wa);color:#fff;
+  font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;box-shadow:0 5px 18px rgba(37,211,102,.25);
+  transition:transform .13s;
+}
+.btn-wa:active{transform:scale(.97);}
+.btn-rst{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:13px;border-radius:var(--r10);
+  border:1.5px solid var(--bdr);background:transparent;
+  font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:var(--t3);
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+<div id="po"><div id="pi"></div></div>
+<script>
+/* ══════════════════════════════════
+   STATE
+══════════════════════════════════ */
+var PHONE='201515667086';
+var navStack=[];      /* array of {el, qId} */
+var answers={};       /* qId→optIdx */
+var scores={};
+var stepNum=0;
+var TOTAL=8;
+
+/* ══════════════════════════════════
+   DATA — BRANDS
+══════════════════════════════════ */
+var BRANDS={
+  zeiss:  {nm:'Zeiss',     sb:'ألمانيا',       ab:'Z',  bg:'#1A3A6B18',co:'#1A3A6B'},
+  hoya:   {nm:'Hoya',      sb:'اليابان',       ab:'H',  bg:'#8B1A1A18',co:'#8B1A1A'},
+  scope:  {nm:'Scope',     sb:'Scope Optics',  ab:'SC', bg:'#1A5C3A18',co:'#1A5C3A'},
+  starv:  {nm:'StarVision', sb:'',              ab:'SV', bg:'#4A1A6B18',co:'#4A1A6B'},
+  seiko:  {nm:'Seiko',     sb:'اليابان',       ab:'SK', bg:'#1A1A6B18',co:'#1A1A6B'},
+  pixel:  {nm:'Pixel',     sb:'',              ab:'PX', bg:'#2A5A1A18',co:'#2A5A1A'},
+  plat:   {nm:'Platinum',  sb:'',              ab:'PT', bg:'#5C5C1A18',co:'#5C5C1A'},
+  bbgr:   {nm:'BBGR',      sb:'فرنسا',         ab:'BB', bg:'#1A4A5C18',co:'#1A4A5C'},
+  kodak:  {nm:'Kodak',     sb:'أمريكا',        ab:'KD', bg:'#8B4A0018',co:'#8B4A00'},
+  unk:    {nm:'لا أعرف',  sb:'سيساعدني الخبير',ab:'؟', bg:'#5A5A5A18',co:'#5A5A5A'}
+};
+
+/* ══════════════════════════════════
+   DATA — LENSES
+══════════════════════════════════ */
+var L={
+  eyezen:    {nm:'Blue Control',         sb:'مصممة للشاشات الرقمية',       d:'تقنية Blue Control تصفي الضوء الأزرق الضار من الشاشات وتقلل الإجهاد والصداع وتحسن جودة النوم. مثالية لساعات طويلة أمام اللابتوب والموبايل. الموديل المناسب يحدده خبير البصريات حسب المتوفر.',       tg:['Blue Control','تقليل إجهاد','مضادة للانعكاس','للشاشات']},
+  blueTrans: {nm:'Blue Control + Transitions', sb:'شاشات وشمس — عدسة واحدة لكل شيء', d:'الجمع المثالي: حماية الضوء الأزرق للشاشات مع التلوين التلقائي في الشمس. تستغني بها عن النظارة الشمسية تماماً. الموديل يحدده خبير البصريات حسب المتوفر.',             tg:['Blue Control','Transitions','UV400','شاشات وخارج']},
+  blueAR:    {nm:'Blue Control + AR',    sb:'حماية الشاشات اليومية',        d:'فلتر احترافي للضوء الأزرق مع طلاء مضاد للانعكاس متعدد الطبقات. تقلل وهج الشاشات وتوفر رؤية واضحة في الإضاءة الاصطناعية. الموديل يحدده خبير البصريات حسب المتوفر.',             tg:['Blue Control','مضادة للانعكاس','UV400','للداخل']},
+  xtraActv:  {nm:'Transitions XTRActive', sb:'للقيادة والشمس الشديدة',      d:'الوحيدة التي تتلون داخل السيارة خلف الزجاج الأمامي. حماية قصوى في الشمس الشديدة مع AR متكامل. الموديل يحدده خبير البصريات حسب المتوفر.',                                           tg:['تتلون في السيارة','UV100%','للقيادة','XTRActive']},
+  trans:     {nm:'Transitions',          sb:'تلوين تلقائي احترافي',         d:'عدسات التلوين التلقائي تحمي عينيك UV100% طوال اليوم وتتكيف مع تغير الإضاءة. الحل الذكي لمن يتنقل بين الداخل والخارج. الموديل يحدده خبير البصريات حسب المتوفر.',                  tg:['Transitions','تلوين تلقائي','UV100%','AR متكامل']},
+  polar:     {nm:'Polarized',            sb:'إزالة الانعكاسات 100%',        d:'تحجب 100% من الانعكاسات الضارة من الطرق والأسطح. وضوح تام في التباين دون إجهاد. الاختيار الأول للقيادة الطويلة والرياضات الخارجية. الموديل يحدده خبير البصريات حسب المتوفر.',    tg:['مستقطبة 100%','للقيادة','UV400','تباين عالي']},
+  hi74:      {nm:'High-Index 1.74',      sb:'للدرجات العالية — الأرق والأخف', d:'أرق وأخف عدسة للدرجات فوق 4. رقة استثنائية مع طلاء AR متكامل. تخلص من ثقل العدسات التقليدية. يمكن إضافة Blue Control عليها. الموديل يحدده خبير البصريات حسب المتوفر.',       tg:['1.74 Index','الأرق في السوق','مضادة للانعكاس','للدرجات العالية']},
+  hi67:      {nm:'High-Index 1.67',      sb:'للدرجات المتوسطة — رفيعة وخفيفة', d:'عدسة رفيعة للدرجات من 2 إلى 4. أقل سمكاً من العدسات العادية مع طلاء AR يمنع الوهج. الموديل يحدده خبير البصريات حسب المتوفر.',                                                tg:['1.67 Index','رفيعة وخفيفة','مضادة للانعكاس','للدرجات المتوسطة']},
+  trivex:    {nm:'Trivex',               sb:'للإطارات المفتوحة — متانة فائقة', d:'مقاومة استثنائية للكسر والصدمات مع وزن خفيف جداً. الأنسب للإطارات Rimless والنصفية. الموديل يحدده خبير البصريات حسب المتوفر.',                                                  tg:['مقاومة للكسر','خفيفة جداً','للإطار المفتوح','AR متكامل']},
+  eyezenR:   {nm:'Blue Control للقراءة', sb:'عدسة القراءة الرقمية',          d:'تجمع دعم القراءة القريبة مع حماية الضوء الأزرق وطلاء AR يقلل تعب العين في القراءة المطولة. مناسبة لكبار السن. الموديل يحدده خبير البصريات حسب المتوفر.',                          tg:['للقراءة','Blue Control','مضادة للانعكاس','تقليل إجهاد']},
+  stdAR:     {nm:'Anti-Reflective + UV', sb:'عدسة أساسية عالية الجودة',     d:'طلاء مضاد للانعكاس متعدد الطبقات مع UV400 كاملة. وضوح في الرؤية وتقليل الوهج من الإضاءة الاصطناعية. الموديل يحدده خبير البصريات حسب المتوفر.',                                   tg:['مضادة للانعكاس','UV400','وضوح تام','للاستخدام اليومي']}
+};
+
+/* ══════════════════════════════════
+   DATA — QUESTIONS GRAPH
+══════════════════════════════════ */
+var Q={
+  q_age:{cat:'معلومة طبية أساسية',txt:'كم عمرك تقريباً؟',sub:'السن عامل طبي رئيسي في تحديد نوع الاحتياج البصري',opts:[
+    {t:'أقل من ٣٠ سنة',     h:'العين في ذروة قوتها — رؤية طبيعية',ico:'teal', nx:'q_young_use',sc:{blueAR:1,eyezen:1}},
+    {t:'من ٣٠ إلى ٤٥ سنة', h:'قد تبدأ صعوبة خفيفة في القراءة القريبة',ico:'blue', nx:'q_mid_use', sc:{eyezen:1,blueAR:1,blueTrans:1}},
+    {t:'٤٦ سنة فأكثر',       h:'الحاجة للقراءة القريبة تزداد مع السن طبيعياً',ico:'amber',nx:'q_senior_use',sc:{eyezenR:2,eyezen:1}}
+  ]},
+
+  q_young_use:{cat:'الحاجة البصرية',txt:'ما الحاجة البصرية الأساسية لنظارتك؟',sub:'',opts:[
+    {t:'رؤية بعيدة — البُعد ضبابي',h:'قصر نظر — صعوبة رؤية الأشياء البعيدة',ico:'blue', nx:'q_lifestyle',sc:{trans:1,stdAR:1}},
+    {t:'عمل على الشاشات',         h:'كمبيوتر وموبايل — عين تتعب بسرعة',      ico:'teal', nx:'q_screen',  sc:{eyezen:3,blueAR:2,blueTrans:1}},
+    {t:'قراءة قريبة — طول نظر',   h:'صعوبة قراءة النصوص الصغيرة من قريب',    ico:'amber',nx:'q_degree',  sc:{stdAR:2,blueAR:1},
+     med:'تنبيه طبي: في سن أقل من ٣٠ هذا غالباً طول نظر (Hyperopia) وليس ضعف شيخوخة — سينجل فيجن كافي تماماً'}
+  ]},
+
+  q_mid_use:{cat:'الحاجة البصرية',txt:'ما الحاجة البصرية الأساسية لنظارتك؟',sub:'',opts:[
+    {t:'رؤية عامة وبُعد',       h:'استخدام يومي شامل — قيادة وعمل وخروج',ico:'blue', nx:'q_lifestyle',sc:{trans:1,blueTrans:1,stdAR:1}},
+    {t:'عمل أمام الشاشات',      h:'ساعات طويلة أمام الكمبيوتر',           ico:'teal', nx:'q_screen',  sc:{eyezen:3,blueAR:2,blueTrans:2}},
+    {t:'بدأت أحتاج قراءة قريبة',h:'الكلام الصغير صعب — أبعّد الورقة',    ico:'amber',nx:'q_degree',  sc:{eyezenR:2,eyezen:1,blueAR:1}}
+  ]},
+
+  q_senior_use:{cat:'الحاجة البصرية',txt:'ما الحاجة البصرية الأساسية لنظارتك؟',sub:'',opts:[
+    {t:'رؤية عامة وبُعد',       h:'قصر نظر أو استخدام شامل',    ico:'blue', nx:'q_lifestyle',sc:{trans:1,eyezen:1,blueTrans:1}},
+    {t:'قراءة فقط — للداخل',    h:'نظارة مخصصة للقراءة والشاشات',ico:'teal', nx:'q_screen',  sc:{eyezenR:4,eyezen:3,blueAR:2}},
+    {t:'بروجريسف — بعيد وقريب', h:'',                            ico:'amber',nx:null,        sc:{},dis:true,disLbl:'قريباً — غير متاح حالياً'}
+  ]},
+
+  q_screen:{cat:'تفاصيل الشاشات',txt:'كم ساعة يومياً أمام الشاشات؟',sub:'الكمبيوتر والموبايل والتابلت مجتمعين',opts:[
+    {t:'أكثر من ٦ ساعات',  h:'مكثف جداً — العين تحتاج حماية قصوى',ico:'coral',nx:'q_degree',sc:{eyezen:4,blueAR:3,blueTrans:2}},
+    {t:'من ٣ إلى ٦ ساعات', h:'متوسط إلى مرتفع',                  ico:'amber',nx:'q_degree',sc:{eyezen:2,blueAR:2,blueTrans:2}},
+    {t:'أقل من ٣ ساعات',   h:'خفيف — إجهاد أقل حدة',             ico:'teal', nx:'q_degree',sc:{blueAR:1,eyezen:1,stdAR:1}}
+  ]},
+
+  q_lifestyle:{cat:'نمط الحياة',txt:'كيف تقضي معظم يومك؟',sub:'',opts:[
+    {t:'الخارج والقيادة أساساً',  h:'شمس ومسافات يومية في السيارة',        ico:'amber',nx:'q_glare',sc:{xtraActv:3,trans:3,polar:3}},
+    {t:'أمام الشاشات في الأغلب', h:'مكتب أو بيت — داخل معظم اليوم',      ico:'blue', nx:'q_screen',sc:{eyezen:2,blueAR:2,blueTrans:1}},
+    {t:'متنوع — داخل وخارج',     h:'يوم مختلط بين المكتب والخروج',        ico:'teal', nx:'q_glare', sc:{blueTrans:3,trans:2,eyezen:1}}
+  ]},
+
+  q_glare:{cat:'الشمس والقيادة',txt:'هل يزعجك وهج الشمس أثناء القيادة؟',sub:'خاصة عند شروق الشمس أو مواجهتها مباشرة',opts:[
+    {t:'نعم، يزعجني جداً',         h:'الشمس تعمي الرؤية أو تسبب صداعاً',ico:'coral',nx:'q_degree',sc:{xtraActv:4,polar:3,trans:1}},
+    {t:'أحياناً — وهج معتدل',      h:'يمكن التعامل معه',                ico:'amber',nx:'q_degree',sc:{trans:2,blueTrans:2,xtraActv:1}},
+    {t:'نادراً — لا أقود كثيراً',  h:'القيادة ليست جزءاً يومياً',      ico:'green', nx:'q_degree',sc:{blueAR:1,eyezen:1,stdAR:1}}
+  ]},
+
+  q_degree:{cat:'درجة النظر',txt:'ما درجة نظرك تقريباً؟',sub:'يمكن معرفتها من آخر وصفة طبية',opts:[
+    {t:'خفيفة — أقل من ٢',    h:'قصر أو طول نظر بسيط',                ico:'green', nx:'q_frame',sc:{}},
+    {t:'متوسطة — من ٢ إلى ٤', h:'درجة واضحة — العدسة المرققة تحسّن المظهر',ico:'blue', nx:'q_frame',sc:{hi67:3}},
+    {t:'عالية — أكثر من ٤',   h:'درجة مرتفعة — العدسة الرفيعة ضرورة',  ico:'coral', nx:'q_frame',sc:{hi74:5,trivex:1}}
+  ]},
+
+  q_frame:{cat:'نوع الإطار',txt:'ما نوع إطار نظارتك؟',sub:'يؤثر على اختيار العدسة من حيث المتانة',opts:[
+    {t:'إطار كامل (Full Frame)',h:'الإطار يحيط بالعدسة بالكامل',         ico:'blue',nx:'q_brand',sc:{}},
+    {t:'بدون حواف أو نصفي',    h:'Rimless / Semi — عدسة مكشوفة تحتاج متانة',ico:'teal',nx:'q_brand',sc:{trivex:3,hi74:1,hi67:1}}
+  ]},
+
+  q_brand:{cat:'الماركة الحالية',txt:'أي ماركة عدسات تستخدم حالياً؟',sub:'يساعدنا في توجيهك للموديل الأنسب',isBrand:true,opts:[
+    {t:'Zeiss',      bk:'zeiss', nx:'result',sc:{hi74:1,hi67:1}},
+    {t:'Hoya',       bk:'hoya',  nx:'result',sc:{eyezen:1,blueAR:1}},
+    {t:'Scope Optics',bk:'scope',nx:'result',sc:{stdAR:1}},
+    {t:'StarVision', bk:'starv', nx:'result',sc:{stdAR:1}},
+    {t:'Seiko',      bk:'seiko', nx:'result',sc:{hi67:1,eyezen:1}},
+    {t:'Pixel',      bk:'pixel', nx:'result',sc:{stdAR:1}},
+    {t:'Platinum',   bk:'plat',  nx:'result',sc:{stdAR:1}},
+    {t:'BBGR',       bk:'bbgr',  nx:'result',sc:{blueTrans:1,eyezen:1}},
+    {t:'Kodak',      bk:'kodak', nx:'result',sc:{stdAR:1,trans:1}},
+    {t:'لا أعرف',    bk:'unk',   nx:'result',sc:{}}
+  ]}
+};
+
+/* ══════════════════════════════════
+   ICONS
+══════════════════════════════════ */
+var IBG={blue:'#E6F1FB',teal:'#E1F5EE',amber:'#FFF0D0',coral:'#FDEAEA',green:'#EAF3DE'};
+var IST={blue:'#185FA5',teal:'#0F6E56',amber:'#8A5200',coral:'#B83232',green:'#3B6D11'};
+function mkIco(c){
+  return '<div class="oi" style="background:'+IBG[c]+'">'+
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+IST[c]+'" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg></div>';
+}
+
+/* ══════════════════════════════════
+   LOGO STRINGS
+══════════════════════════════════ */
+var LHDR='<svg height=\"26\" viewBox=\"245 300 695 610\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"#FCFAE0\" d=\"M866.67,520.21c-9.01,3.72-18.58,6.34-28.54,7.69c-1.38,0.18-2.6,0.96-3.33,2.13 c-7.4,11.62-16.84,21.81-27.76,30.14c-18.69,14.34-41.76,23.18-66.58,24.1c-22.42,0.84-43.46-4.62-61.58-14.82 c-9.4-5.22-18.08-11.74-25.62-19.32c-21.28-21.36-57.16-95.85-65.24-123.54c-6.62-23.37-18.85-44.49-35.06-61.7 c-7.64-8.13-16.25-15.42-25.57-21.67c-26.93-18.04-60.07-27.64-95.53-24.69c-72.7,6.04-131.05,65.24-136.12,137.99 c-6.06,87,63.02,159.69,148.74,159.69c30.68,0,59.2-9.32,82.9-25.2c9.32-6.25,17.93-13.55,25.57-21.67 c16.21-17.22,28.44-38.32,35.06-61.71c0.64-2.31,3.86-2.31,4.54,0.04c6.61,23.42,18.84,44.54,35.09,61.78 c7.73,8.13,16.3,15.37,25.62,21.63c23.7,15.86,52.2,25.13,82.79,25.13c48.35,0,91.41-23.13,118.66-58.92 c7.21-9.47,13.32-19.8,18.13-30.83C874.51,522.6,870.55,518.6,866.67,520.21z M527.38,549.97c-7.53,7.56-16.14,14.1-25.53,19.39 c-18.17,10.24-39.32,15.74-61.83,14.91c-59.32-2.2-108.43-49.64-112.5-108.87c-4.69-68.48,49.47-125.52,116.96-125.52 c20.84,0,40.39,5.42,57.37,14.98c9.39,5.3,18,11.83,25.53,19.4c21.19,21.23,34.34,50.51,34.34,82.86 C561.72,499.45,548.57,528.74,527.38,549.97z\"/> <path fill=\"#FCFAE0\" d=\"M885.15,467.07c0,3.44-0.12,6.87-0.36,10.27c-0.25,3.58-3.19,6.38-6.78,6.38l-150.66,0 c-3.74,0-6.77-3.03-6.77-6.77v-19.68c0-3.74,3.03-6.77,6.77-6.77l116.63,0c4.32,0,7.56-3.99,6.65-8.21 c-2.18-10.19-5.72-19.87-10.38-28.87c-19.48-37.72-58.88-63.54-104.21-63.54c-4.78,0-9.52,0.28-14.18,0.88 c-14.7,1.75-28.56,6.25-41.07,13.03c-0.64,0.32-1.27,0.64-1.91,1c-9.4,5.22-18.05,11.75-25.61,19.32 c-9.08,9.04-16.65,19.6-22.39,31.23c-0.92,1.79-3.47,1.87-4.3,0.04c-5.22-11.19-8.68-23.34-10.16-36.13 c-0.04-0.64,0.12-1.27,0.52-1.79c3.31-4.42,6.89-8.64,10.72-12.67c7.73-8.13,16.29-15.38,25.61-21.63 c14.98-10,31.83-17.41,49.95-21.47c14.58-3.31,29.96-4.46,45.77-3.11c0.56,0.04,1.12,0.08,1.67,0.16 c39.72,3.82,75.01,23.54,99.43,52.58c10.32,12.19,18.68,26.05,24.62,41.11c4.78,12.03,8.05,24.82,9.52,38.08 c0.24,2.07,0.44,4.14,0.56,6.21C885.03,460.18,885.15,463.64,885.15,467.07z\"/> <g> <path fill=\"#FCFAE0\" d=\"M375.76,838.09c-10.29,4.53-21.65,6.79-34.1,6.79c-12.44,0-23.83-2.26-34.16-6.79 c-10.33-4.53-18.71-10.48-25.14-17.84c-6.43-7.37-11.41-15.56-14.92-24.57c-3.51-9.02-5.27-18.22-5.27-27.62v-0.25 c0-9.4,1.76-18.62,5.27-27.68c3.51-9.06,8.49-17.31,14.92-24.76c6.43-7.45,14.81-13.48,25.14-18.09 c10.33-4.61,21.71-6.92,34.16-6.92c9.99,0,19.34,1.52,28.06,4.57c8.72,3.05,16.17,7.11,22.35,12.19 c6.18,5.08,11.47,10.96,15.87,17.65c4.4,6.69,7.68,13.72,9.84,21.08c2.16,7.37,3.24,14.77,3.24,22.22c0,9.4-1.76,18.6-5.27,27.62 c-3.51,9.02-8.49,17.21-14.92,24.57C394.4,827.61,386.05,833.56,375.76,838.09z M315.82,795.61c6.81,7.03,15.43,10.54,25.84,10.54 c10.41,0,19-3.51,25.78-10.54c6.77-7.03,10.16-16.21,10.16-27.56c0-11.34-3.41-20.7-10.22-28.06 c-6.82-7.37-15.39-11.05-25.72-11.05c-10.41,0-19.03,3.68-25.84,11.05c-6.82,7.36-10.22,16.72-10.22,28.06v0.25 C305.6,779.49,309.01,788.59,315.82,795.61z\"/> <path fill=\"#FCFAE0\" d=\"M772.29,726.84c14.47,0,26.9,4.18,37.28,12.54c10.38,8.36,16.97,19.46,19.79,33.29H796.5 c-1.54-4.93-4.6-8.87-9.17-11.82c-4.58-2.94-9.72-4.42-15.42-4.42c-7.3,0-13.2,2.5-17.68,7.49c-4.48,5-6.72,11.69-6.72,20.08 c0,8.71,2.42,15.81,7.25,21.28c4.84,5.48,10.97,8.21,18.4,8.21c5.51,0,10.41-1.39,14.7-4.18c4.29-2.79,7.17-6.61,8.65-11.48h32.86 c-3.01,13.84-9.67,24.87-19.98,33.1c-10.31,8.23-22.67,12.35-37.09,12.35c-11.02,0-20.91-2.48-29.69-7.45 c-8.78-4.96-15.61-11.88-20.51-20.75c-4.9-8.87-7.35-18.88-7.35-30.02c0-11.14,2.45-21.15,7.35-30.02 c4.9-8.87,11.74-15.79,20.51-20.75C751.37,729.32,761.27,726.84,772.29,726.84z\"/> <polygon fill=\"#FCFAE0\" points=\"659.3,839.92 659.2,730.1 692.06,730.1 692.06,839.92\"/> <rect fill=\"#FCFAE0\" x=\"659.2\" y=\"686.1\" width=\"32.86\" height=\"28.15\"/> <path fill=\"#FCFAE0\" d=\"M622.69,702.14v27.96h17.2v29.21h-17.2v80.61h-32.86v-80.61h-17.39V730.1h17.39v-27.96H622.69z\"/> <path fill=\"#FCFAE0\" d=\"M443.6,882V730.1h31.9v11.24c3.97-4.87,8.94-8.61,14.89-11.24c5.96-2.62,12.46-3.94,19.5-3.94 c15.24,0,27.85,5.57,37.81,16.72c9.96,11.14,14.94,25.24,14.94,42.27c0,17.17-5.06,31.1-15.18,41.79 c-10.12,10.7-23.32,16.04-39.58,16.04c-13.2,0-23.67-3.81-31.42-11.43V882H443.6z M502.31,811.96c7.62,0,14.11-2.61,19.46-7.83 c5.35-5.22,8.02-11.51,8.02-18.88c0-7.49-2.74-14.04-8.21-19.65c-5.48-5.6-11.9-8.41-19.26-8.41c-7.3,0-13.58,2.77-18.83,8.31 c-5.25,5.54-7.88,12.12-7.88,19.74c0,7.49,2.59,13.82,7.78,18.98C488.57,809.38,494.88,811.96,502.31,811.96z\"/> <path fill=\"#FCFAE0\" d=\"M844.54,804.56h32.86c0.45,3.65,1.94,6.71,4.47,9.18c2.53,2.47,5.46,3.7,8.79,3.7 c8.9,0,13.36-4.16,13.36-12.49c0-1.92-0.85-3.57-2.55-4.95c-1.7-1.38-3.91-2.43-6.63-3.17c-2.72-0.74-5.85-1.54-9.37-2.4 c-3.52-0.86-7.13-1.68-10.81-2.45c-3.68-0.77-7.29-1.94-10.81-3.51c-3.52-1.57-6.65-3.38-9.37-5.43c-2.72-2.05-4.93-4.82-6.63-8.31 c-1.7-3.49-2.55-7.51-2.55-12.06c0-11.14,4.07-20.02,12.2-26.61c8.13-6.6,19.09-9.9,32.86-9.9c12.11,0,22.05,3.25,29.83,9.75 c7.78,6.5,12.5,15.49,14.17,26.95h-30.84c0-3.33-1.2-6.01-3.6-8.02c-2.4-2.02-5.59-3.03-9.56-3.03c-3.91,0-6.77,0.88-8.6,2.64 c-1.83,1.76-2.74,4.5-2.74,8.22c0,2.37,1.09,4.36,3.27,5.96c2.18,1.6,5,2.87,8.45,3.8c3.46,0.93,7.27,1.84,11.43,2.74 c4.16,0.9,8.33,2.02,12.49,3.36c4.16,1.35,7.98,3.01,11.43,5c3.46,1.99,6.28,4.8,8.45,8.46c2.18,3.65,3.27,7.94,3.27,12.87 c0,11.79-4.23,21.1-12.68,27.96c-8.45,6.85-19.95,10.28-34.49,10.28c-13,0-23.54-3.38-31.61-10.14 C850.97,826.2,846.14,816.73,844.54,804.56z\"/></svg>';
+
+var LBIG='<svg width=\"200\" viewBox=\"245 300 695 610\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"#FCFAE0\" d=\"M866.67,520.21c-9.01,3.72-18.58,6.34-28.54,7.69c-1.38,0.18-2.6,0.96-3.33,2.13 c-7.4,11.62-16.84,21.81-27.76,30.14c-18.69,14.34-41.76,23.18-66.58,24.1c-22.42,0.84-43.46-4.62-61.58-14.82 c-9.4-5.22-18.08-11.74-25.62-19.32c-21.28-21.36-57.16-95.85-65.24-123.54c-6.62-23.37-18.85-44.49-35.06-61.7 c-7.64-8.13-16.25-15.42-25.57-21.67c-26.93-18.04-60.07-27.64-95.53-24.69c-72.7,6.04-131.05,65.24-136.12,137.99 c-6.06,87,63.02,159.69,148.74,159.69c30.68,0,59.2-9.32,82.9-25.2c9.32-6.25,17.93-13.55,25.57-21.67 c16.21-17.22,28.44-38.32,35.06-61.71c0.64-2.31,3.86-2.31,4.54,0.04c6.61,23.42,18.84,44.54,35.09,61.78 c7.73,8.13,16.3,15.37,25.62,21.63c23.7,15.86,52.2,25.13,82.79,25.13c48.35,0,91.41-23.13,118.66-58.92 c7.21-9.47,13.32-19.8,18.13-30.83C874.51,522.6,870.55,518.6,866.67,520.21z M527.38,549.97c-7.53,7.56-16.14,14.1-25.53,19.39 c-18.17,10.24-39.32,15.74-61.83,14.91c-59.32-2.2-108.43-49.64-112.5-108.87c-4.69-68.48,49.47-125.52,116.96-125.52 c20.84,0,40.39,5.42,57.37,14.98c9.39,5.3,18,11.83,25.53,19.4c21.19,21.23,34.34,50.51,34.34,82.86 C561.72,499.45,548.57,528.74,527.38,549.97z\"/> <path fill=\"#FCFAE0\" d=\"M885.15,467.07c0,3.44-0.12,6.87-0.36,10.27c-0.25,3.58-3.19,6.38-6.78,6.38l-150.66,0 c-3.74,0-6.77-3.03-6.77-6.77v-19.68c0-3.74,3.03-6.77,6.77-6.77l116.63,0c4.32,0,7.56-3.99,6.65-8.21 c-2.18-10.19-5.72-19.87-10.38-28.87c-19.48-37.72-58.88-63.54-104.21-63.54c-4.78,0-9.52,0.28-14.18,0.88 c-14.7,1.75-28.56,6.25-41.07,13.03c-0.64,0.32-1.27,0.64-1.91,1c-9.4,5.22-18.05,11.75-25.61,19.32 c-9.08,9.04-16.65,19.6-22.39,31.23c-0.92,1.79-3.47,1.87-4.3,0.04c-5.22-11.19-8.68-23.34-10.16-36.13 c-0.04-0.64,0.12-1.27,0.52-1.79c3.31-4.42,6.89-8.64,10.72-12.67c7.73-8.13,16.29-15.38,25.61-21.63 c14.98-10,31.83-17.41,49.95-21.47c14.58-3.31,29.96-4.46,45.77-3.11c0.56,0.04,1.12,0.08,1.67,0.16 c39.72,3.82,75.01,23.54,99.43,52.58c10.32,12.19,18.68,26.05,24.62,41.11c4.78,12.03,8.05,24.82,9.52,38.08 c0.24,2.07,0.44,4.14,0.56,6.21C885.03,460.18,885.15,463.64,885.15,467.07z\"/> <g> <path fill=\"#FCFAE0\" d=\"M375.76,838.09c-10.29,4.53-21.65,6.79-34.1,6.79c-12.44,0-23.83-2.26-34.16-6.79 c-10.33-4.53-18.71-10.48-25.14-17.84c-6.43-7.37-11.41-15.56-14.92-24.57c-3.51-9.02-5.27-18.22-5.27-27.62v-0.25 c0-9.4,1.76-18.62,5.27-27.68c3.51-9.06,8.49-17.31,14.92-24.76c6.43-7.45,14.81-13.48,25.14-18.09 c10.33-4.61,21.71-6.92,34.16-6.92c9.99,0,19.34,1.52,28.06,4.57c8.72,3.05,16.17,7.11,22.35,12.19 c6.18,5.08,11.47,10.96,15.87,17.65c4.4,6.69,7.68,13.72,9.84,21.08c2.16,7.37,3.24,14.77,3.24,22.22c0,9.4-1.76,18.6-5.27,27.62 c-3.51,9.02-8.49,17.21-14.92,24.57C394.4,827.61,386.05,833.56,375.76,838.09z M315.82,795.61c6.81,7.03,15.43,10.54,25.84,10.54 c10.41,0,19-3.51,25.78-10.54c6.77-7.03,10.16-16.21,10.16-27.56c0-11.34-3.41-20.7-10.22-28.06 c-6.82-7.37-15.39-11.05-25.72-11.05c-10.41,0-19.03,3.68-25.84,11.05c-6.82,7.36-10.22,16.72-10.22,28.06v0.25 C305.6,779.49,309.01,788.59,315.82,795.61z\"/> <path fill=\"#FCFAE0\" d=\"M772.29,726.84c14.47,0,26.9,4.18,37.28,12.54c10.38,8.36,16.97,19.46,19.79,33.29H796.5 c-1.54-4.93-4.6-8.87-9.17-11.82c-4.58-2.94-9.72-4.42-15.42-4.42c-7.3,0-13.2,2.5-17.68,7.49c-4.48,5-6.72,11.69-6.72,20.08 c0,8.71,2.42,15.81,7.25,21.28c4.84,5.48,10.97,8.21,18.4,8.21c5.51,0,10.41-1.39,14.7-4.18c4.29-2.79,7.17-6.61,8.65-11.48h32.86 c-3.01,13.84-9.67,24.87-19.98,33.1c-10.31,8.23-22.67,12.35-37.09,12.35c-11.02,0-20.91-2.48-29.69-7.45 c-8.78-4.96-15.61-11.88-20.51-20.75c-4.9-8.87-7.35-18.88-7.35-30.02c0-11.14,2.45-21.15,7.35-30.02 c4.9-8.87,11.74-15.79,20.51-20.75C751.37,729.32,761.27,726.84,772.29,726.84z\"/> <polygon fill=\"#FCFAE0\" points=\"659.3,839.92 659.2,730.1 692.06,730.1 692.06,839.92\"/> <rect fill=\"#FCFAE0\" x=\"659.2\" y=\"686.1\" width=\"32.86\" height=\"28.15\"/> <path fill=\"#FCFAE0\" d=\"M622.69,702.14v27.96h17.2v29.21h-17.2v80.61h-32.86v-80.61h-17.39V730.1h17.39v-27.96H622.69z\"/> <path fill=\"#FCFAE0\" d=\"M443.6,882V730.1h31.9v11.24c3.97-4.87,8.94-8.61,14.89-11.24c5.96-2.62,12.46-3.94,19.5-3.94 c15.24,0,27.85,5.57,37.81,16.72c9.96,11.14,14.94,25.24,14.94,42.27c0,17.17-5.06,31.1-15.18,41.79 c-10.12,10.7-23.32,16.04-39.58,16.04c-13.2,0-23.67-3.81-31.42-11.43V882H443.6z M502.31,811.96c7.62,0,14.11-2.61,19.46-7.83 c5.35-5.22,8.02-11.51,8.02-18.88c0-7.49-2.74-14.04-8.21-19.65c-5.48-5.6-11.9-8.41-19.26-8.41c-7.3,0-13.58,2.77-18.83,8.31 c-5.25,5.54-7.88,12.12-7.88,19.74c0,7.49,2.59,13.82,7.78,18.98C488.57,809.38,494.88,811.96,502.31,811.96z\"/> <path fill=\"#FCFAE0\" d=\"M844.54,804.56h32.86c0.45,3.65,1.94,6.71,4.47,9.18c2.53,2.47,5.46,3.7,8.79,3.7 c8.9,0,13.36-4.16,13.36-12.49c0-1.92-0.85-3.57-2.55-4.95c-1.7-1.38-3.91-2.43-6.63-3.17c-2.72-0.74-5.85-1.54-9.37-2.4 c-3.52-0.86-7.13-1.68-10.81-2.45c-3.68-0.77-7.29-1.94-10.81-3.51c-3.52-1.57-6.65-3.38-9.37-5.43c-2.72-2.05-4.93-4.82-6.63-8.31 c-1.7-3.49-2.55-7.51-2.55-12.06c0-11.14,4.07-20.02,12.2-26.61c8.13-6.6,19.09-9.9,32.86-9.9c12.11,0,22.05,3.25,29.83,9.75 c7.78,6.5,12.5,15.49,14.17,26.95h-30.84c0-3.33-1.2-6.01-3.6-8.02c-2.4-2.02-5.59-3.03-9.56-3.03c-3.91,0-6.77,0.88-8.6,2.64 c-1.83,1.76-2.74,4.5-2.74,8.22c0,2.37,1.09,4.36,3.27,5.96c2.18,1.6,5,2.87,8.45,3.8c3.46,0.93,7.27,1.84,11.43,2.74 c4.16,0.9,8.33,2.02,12.49,3.36c4.16,1.35,7.98,3.01,11.43,5c3.46,1.99,6.28,4.8,8.45,8.46c2.18,3.65,3.27,7.94,3.27,12.87 c0,11.79-4.23,21.1-12.68,27.96c-8.45,6.85-19.95,10.28-34.49,10.28c-13,0-23.54-3.38-31.61-10.14 C850.97,826.2,846.14,816.73,844.54,804.56z\"/></svg>';
+
+/* ══════════════════════════════════
+   SLIDE ENGINE
+══════════════════════════════════ */
+function slideTo(idx){
+  document.getElementById('pi').style.transform='translateX('+(-idx*100)+'vw)';
+}
+
+function pushPnl(el,qId){
+  var pi=document.getElementById('pi');
+  pi.appendChild(el);
+  navStack.push({el:el,qId:qId});
+  slideTo(navStack.length-1);
+  setTimeout(function(){el.scrollTop=0;},430);
+}
+
+function goBack(){
+  if(navStack.length<=1)return;
+  var cur=navStack.pop();
+  /* undo scores */
+  var qId=cur.qId;
+  if(qId&&Q[qId]&&answers[qId]!==undefined){
+    var op=Q[qId].opts[answers[qId]];
+    if(op&&op.sc)Object.keys(op.sc).forEach(function(k){scores[k]=Math.max(0,(scores[k]||0)-op.sc[k]);});
+    delete answers[qId];
+  }
+  slideTo(navStack.length-1);
+  setTimeout(function(){if(cur.el.parentNode)cur.el.parentNode.removeChild(cur.el);},450);
+}
+
+/* ══════════════════════════════════
+   BUILD WELCOME
+══════════════════════════════════ */
+function mkWelcome(){
+  var p=document.createElement('div');
+  p.className='pnl pnl-dk';p.setAttribute('data-qid','_welcome');
+  p.innerHTML=
+    '<div class="hdr" style="justify-content:center;">'+LHDR+'</div>'+
+    '<div class="w-in">'+
+      '<div style="margin-bottom:26px;">'+LBIG+'</div>'+
+      '<p class="w-tag">مساعد اختيار العدسات</p>'+
+      '<h1 class="w-ttl">عدستك المثالية<br/>بدقة طبية</h1>'+
+      '<p class="w-sub">أسئلة طبية مدروسة تحدد العدسة الأنسب لعمرك واحتياجك وماركتك المفضلة</p>'+
+      '<div class="w-feats">'+
+        feat('تشخيص طبي دقيق')+feat('دقيقتان فقط')+feat('توصية شخصية')+
+      '</div>'+
+      '<button class="btn-start" onclick="startFunnel()">ابدأ التشخيص ←</button>'+
+    '</div>';
+  return p;
+}
+function feat(t){return '<span class="w-feat"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 6l3 3 7-7"/></svg>'+t+'</span>';}
+
+/* ══════════════════════════════════
+   BUILD QUESTION PANEL
+══════════════════════════════════ */
+function mkQPnl(qId){
+  stepNum++;
+  var q=Q[qId];
+  var pct=Math.round(((stepNum-1)/TOTAL)*100);
+  var optsH='';
+
+  if(q.isBrand){
+    optsH='<div class="brd-grid">';
+    q.opts.forEach(function(o,i){
+      var br=BRANDS[o.bk]||BRANDS.unk;
+      optsH+='<div class="brd-opt" id="bo_'+qId+'_'+i+'" onclick="pickBrand(\''+qId+'\','+i+',this)">'+
+        '<div class="brd-ico" style="background:'+br.bg+';color:'+br.co+'">'+br.ab+'</div>'+
+        '<span class="brd-nm">'+o.t+'</span>'+
+        (br.sb?'<span class="brd-sb">'+br.sb+'</span>':'')+
+      '</div>';
+    });
+    optsH+='</div>';
+  } else {
+    optsH='<div class="opts">';
+    q.opts.forEach(function(o,i){
+      var dc=o.dis?' dis':'';
+      var sl=o.dis?'<span class="soon">'+o.disLbl+'</span>':'';
+      var oc=o.dis?'':'onclick="pickOpt(\''+qId+'\','+i+',this)"';
+      optsH+='<div class="opt'+dc+'" '+oc+'>'+sl+
+        mkIco(o.ico)+
+        '<div class="ob"><span class="ot">'+o.t+'</span>'+(o.h?'<span class="oh">'+o.h+'</span>':'')+'</div>'+
+        '<div class="ock"><div class="ockd"></div></div>'+
+      '</div>';
+    });
+    optsH+='</div>';
+  }
+
+  var p=document.createElement('div');
+  p.className='pnl';p.setAttribute('data-qid',qId);
+  p.innerHTML=
+    '<div class="hdr">'+
+      '<div class="hdr-back" onclick="goBack()">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EFE9C8" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>'+
+      '</div>'+
+      LHDR+
+      '<span class="hdr-step">'+stepNum+'/'+TOTAL+'</span>'+
+    '</div>'+
+    '<div class="q-bd">'+
+      '<div class="q-prog">'+
+        '<div class="q-pr-row"><span class="q-pr-lbl">'+q.cat+'</span><span class="q-pr-pct">'+pct+'%</span></div>'+
+        '<div class="q-pr-bar"><div class="q-pr-fill" style="width:'+pct+'%"></div></div>'+
+      '</div>'+
+      '<span class="q-chip">'+q.cat+'</span>'+
+      '<p class="q-txt">'+q.txt+'</p>'+
+      (q.sub?'<p class="q-sub">'+q.sub+'</p>':'')+
+      optsH+
+      '<div id="mn_'+qId+'"></div>'+
+    '</div>';
+  return p;
+}
+
+/* ══════════════════════════════════
+   PICK HANDLERS
+══════════════════════════════════ */
+function pickOpt(qId,oi,el){
+  var q=Q[qId]; var opt=q.opts[oi];
+  /* visual */
+  el.parentElement.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+  /* score: deduct old if re-picking */
+  if(answers[qId]!==undefined){
+    var old=q.opts[answers[qId]];
+    if(old&&old.sc)Object.keys(old.sc).forEach(function(k){scores[k]=Math.max(0,(scores[k]||0)-old.sc[k]);});
+  }
+  answers[qId]=oi;
+  if(opt.sc)Object.keys(opt.sc).forEach(function(k){scores[k]=(scores[k]||0)+opt.sc[k];});
+  /* med note */
+  if(opt.med){
+    var ne=document.getElementById('mn_'+qId);
+    if(ne)ne.innerHTML='<div class="med-box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A5200" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p class="med-txt">'+opt.med+'</p></div>';
+  }
+  setTimeout(function(){
+    if(opt.nx==='result')mkResult();
+    else if(opt.nx){var p=mkQPnl(opt.nx);pushPnl(p,opt.nx);}
+  },380);
+}
+
+function pickBrand(qId,oi,el){
+  var q=Q[qId]; var opt=q.opts[oi];
+  el.parentElement.querySelectorAll('.brd-opt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+  /* score: deduct old */
+  if(answers[qId]!==undefined){
+    var old=q.opts[answers[qId]];
+    if(old&&old.sc)Object.keys(old.sc).forEach(function(k){scores[k]=Math.max(0,(scores[k]||0)-old.sc[k]);});
+  }
+  answers[qId]=oi;
+  if(opt.sc)Object.keys(opt.sc).forEach(function(k){scores[k]=(scores[k]||0)+opt.sc[k];});
+  setTimeout(function(){
+    if(opt.nx==='result')mkResult();
+    else if(opt.nx){var p=mkQPnl(opt.nx);pushPnl(p,opt.nx);}
+  },340);
+}
+
+/* ══════════════════════════════════
+   START
+══════════════════════════════════ */
+function startFunnel(){
+  navStack=[];answers={};scores={};stepNum=0;
+  var pi=document.getElementById('pi');
+  while(pi.children.length>1)pi.removeChild(pi.lastChild);
+  /* re-add welcome to navStack */
+  navStack.push({el:pi.children[0],qId:'_welcome'});
+  var p=mkQPnl('q_age');
+  pushPnl(p,'q_age');
+}
+
+/* ══════════════════════════════════
+   RESULT
+══════════════════════════════════ */
+function mkResult(){
+  /* medical adjustments */
+  var ageA=answers['q_age'];
+  var degA=answers['q_degree'];
+  var frA=answers['q_frame'];
+  var brA=answers['q_brand'];
+  var brOpt=Q['q_brand'].opts[brA];
+  var brKey=brOpt?brOpt.bk:'unk';
+
+  if(ageA===0){scores['eyezenR']=0;}
+  if(ageA===0&&answers['q_young_use']===2){scores['stdAR']=(scores['stdAR']||0)+2;scores['eyezenR']=0;}
+  if(degA===0){scores['hi74']=0;scores['hi67']=0;}
+  if(degA===1){scores['hi74']=0;}
+  if(frA===1){scores['trivex']=(scores['trivex']||0)+3;if(degA>=1)scores['hi74']=(scores['hi74']||0)+1;if(degA===1)scores['hi67']=(scores['hi67']||0)+1;}
+  if(ageA===2&&answers['q_senior_use']===1){scores['eyezenR']=(scores['eyezenR']||0)+4;}
+
+  var keys=Object.keys(L).sort(function(a,b){return(scores[b]||0)-(scores[a]||0);});
+  var pK=keys[0],aK=keys[1];
+  var pL=L[pK],aL=L[aK];
+  var br=BRANDS[brKey]||BRANDS.unk;
+
+  /* brand line */
+  var brLine=brKey!=='unk'?
+    '<div class="res-brpill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>تستخدم '+br.nm+' حالياً</div>':'';
+
+  /* ── معامل الانكسار بناءً على الدرجة والإطار ── */
+  var idxData={val:'',label:'',note:'',color:'#1A3A6B',bg:'#E6F1FB'};
+  var rimless=(frA===1);
+  if(rimless){
+    /* إطار مفتوح — Trivex أو polycarbonate بغض النظر عن الدرجة */
+    if(degA===0)      idxData={val:'Trivex / 1.60 PC',label:'معامل الانكسار الموصى به',note:'الإطار المفتوح يستوجب عدسة مقاومة للكسر (Trivex أو Polycarbonate)',color:'#0F6E56',bg:'#E1F5EE'};
+    else if(degA===1) idxData={val:'Trivex / 1.67',   label:'معامل الانكسار الموصى به',note:'للدرجات المتوسطة مع إطار مفتوح: Trivex للمتانة أو 1.67 للرقة',   color:'#0F6E56',bg:'#E1F5EE'};
+    else              idxData={val:'Trivex / 1.74',   label:'معامل الانكسار الموصى به',note:'للدرجات العالية مع إطار مفتوح: Trivex للمتانة أو 1.74 للرقة القصوى',color:'#0F6E56',bg:'#E1F5EE'};
+  } else {
+    /* إطار كامل */
+    if(degA===0)      idxData={val:'1.50 (Standard)',label:'معامل الانكسار الموصى به',note:'الدرجة الخفيفة — العدسة القياسية كافية تماماً وبتكلفة مناسبة',color:'#1A3A6B',bg:'#E6F1FB'};
+    else if(degA===1) idxData={val:'1.67 High-Index', label:'معامل الانكسار الموصى به',note:'للدرجات المتوسطة — أقل سُمكاً وأخف وزناً من 1.50 بشكل ملحوظ',  color:'#1A3A6B',bg:'#E6F1FB'};
+    else              idxData={val:'1.74 High-Index', label:'معامل الانكسار الموصى به',note:'للدرجات العالية — أرق عدسة متاحة في السوق للدرجات فوق 4',     color:'#7A2800',bg:'#FDEAEA'};
+  }
+  var idxCard=
+    '<div style="background:'+idxData.bg+';border:1.5px solid '+idxData.color+'33;border-radius:var(--r14);padding:15px 17px;display:flex;align-items:center;gap:14px;">'+
+      '<div style="width:52px;height:52px;border-radius:12px;background:'+idxData.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'+
+      '</div>'+
+      '<div style="flex:1;">'+
+        '<p style="font-size:10px;font-weight:800;color:'+idxData.color+';letter-spacing:.06em;margin-bottom:5px;">'+idxData.label+'</p>'+
+        '<p style="font-size:18px;font-weight:900;color:'+idxData.color+';margin-bottom:5px;line-height:1.2;">'+idxData.val+'</p>'+
+        '<p style="font-size:11px;color:'+idxData.color+'CC;line-height:1.55;">'+idxData.note+'</p>'+
+      '</div>'+
+    '</div>';
+
+  /* med note */
+  var mNote='';
+  if(ageA===0&&answers['q_young_use']===2)mNote='<div class="amb-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A5200" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p style="font-size:12px;color:var(--amber);line-height:1.65;font-weight:600;">يُنصح بفحص شامل لدى طبيب عيون لتأكيد التشخيص وإخراج وصفة دقيقة في هذا السن.</p></div>';
+  else if(ageA===2)mNote='<div class="amb-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A5200" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p style="font-size:12px;color:var(--amber);line-height:1.65;font-weight:600;">فحص دوري كل ٦-١٢ شهراً مهم في هذا السن. عدسات البروجريسف ستكون متاحة قريباً.</p></div>';
+
+  /* summary */
+  var sumH=Object.keys(answers).map(function(qId){
+    var aIdx=answers[qId];var q=Q[qId];if(!q)return'';
+    var op=q.opts[aIdx];if(!op)return'';
+    return'<div class="sum-item"><div class="sum-dot"></div>'+op.t+'</div>';
+  }).join('');
+
+  var p=document.createElement('div');
+  p.className='pnl';p.setAttribute('data-qid','_result');
+  /* store idxData.val for WA message */
+  p.setAttribute('data-idx',idxData.val);
+  p.innerHTML=
+    '<div class="hdr">'+
+      '<div class="hdr-back" onclick="goBack()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EFE9C8" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>'+
+      LHDR+
+      '<span class="hdr-step">النتيجة</span>'+
+    '</div>'+
+    '<div class="res-hero">'+
+      '<p class="res-top">✦ العدسة الموصى بها لك</p>'+
+      brLine+
+      '<p class="res-nm">'+pL.nm+'</p>'+
+      '<p class="res-sb">'+pL.sb+'</p>'+
+      '<div class="res-tags">'+pL.tg.map(function(t){return'<span class="rtag">'+t+'</span>';}).join('')+'</div>'+
+    '</div>'+
+    '<div class="res-body">'+
+      idxCard+
+      '<div class="inf-card"><p class="inf-lbl">لماذا هذه العدسة؟</p><p class="inf-txt">'+pL.d+'</p></div>'+
+      mNote+
+      '<div class="alt-row"><div class="alt-ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><p class="alt-l">بديل موصى به أيضاً</p><p class="alt-n">'+aL.nm+'</p></div></div>'+
+      '<div class="sum-card"><p class="sum-l">ملخص احتياجاتك</p><div class="sum-items">'+sumH+'</div></div>'+
+      '<button class="btn-wa" onclick="openWA(\''+pK+'\',\''+aK+'\',\''+brKey+'\',\''+idxData.val+'\')">'+
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.122 1.532 5.856L0 24l6.335-1.508A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.6a9.6 9.6 0 01-4.9-1.341l-.351-.208-3.761.895.928-3.656-.228-.375A9.6 9.6 0 1121.6 12 9.611 9.611 0 0112 21.6z"/></svg>'+
+        'استفسر عن العدسة عبر واتساب'+
+      '</button>'+
+      '<button class="btn-rst" onclick="restartAll()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>إعادة التشخيص من البداية</button>'+
+    '</div>';
+
+  pushPnl(p,'_result');
+}
+
+/* ══════════════════════════════════
+   WHATSAPP
+══════════════════════════════════ */
+function openWA(pK,aK,brKey,idxVal){
+  var p=L[pK],a=L[aK],br=BRANDS[brKey]||BRANDS.unk;
+  var tags=p.tg.join(' | ');
+  var lines=Object.keys(answers).map(function(qId){
+    var aIdx=answers[qId];var q=Q[qId];if(!q)return'';
+    var op=q.opts[aIdx];return op?'• '+op.t:'';
+  }).filter(Boolean).join('\n');
+  var brLine=brKey!=='unk'?'\n🏷️ *الماركة الحالية:* '+br.nm:'';
+  var msg='مرحباً 👋 من ae optics\n\nأكملت تشخيص العدسة ودي نتيجتي:\n\n'+
+    '⭐ *العدسة الموصى بها:* '+p.nm+'\n'+
+    '🔬 *معامل الانكسار:* '+idxVal+'\n'+
+    'الميزات: '+tags+brLine+'\n\n'+
+    '📋 *ملخص احتياجاتي:*\n'+lines+'\n\n'+
+    '💡 *البديل المناسب:* '+a.nm+'\n\n'+
+    'ممكن تساعدوني في تجهيزها؟ 🙏';
+  window.open('https://wa.me/'+PHONE+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ══════════════════════════════════
+   RESTART
+══════════════════════════════════ */
+function restartAll(){
+  navStack=[];answers={};scores={};stepNum=0;
+  var pi=document.getElementById('pi');
+  while(pi.children.length>1)pi.removeChild(pi.lastChild);
+  pi.style.transition='none';
+  pi.style.transform='translateX(0)';
+  navStack.push({el:pi.children[0],qId:'_welcome'});
+  setTimeout(function(){pi.style.transition='';},50);
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+(function(){
+  var pi=document.getElementById('pi');
+  var w=mkWelcome();
+  pi.appendChild(w);
+  navStack.push({el:w,qId:'_welcome'});
+})();
+</script>
+</body>
+</html>
